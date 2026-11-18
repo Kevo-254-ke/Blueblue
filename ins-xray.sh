@@ -29,8 +29,8 @@ export WARNING="${RED}\e[5m"
 export UNDERLINE="\e[4m"
 
 # // Exporting URL Host
-export Server_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/test"
-export Server1_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/limit"
+export Server_URL="raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/test"
+export Server1_URL="raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/limit"
 export Server_Port="443"
 export Server_IP="underfined"
 export Script_Mode="Stable"
@@ -153,9 +153,9 @@ apt install -y nginx
 cd
 rm -fr /etc/nginx/sites-enabled/default
 rm -fr /etc/nginx/sites-available/default
-wget -q -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/nginx.conf" 
+wget -q -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/nginx.conf"
 #mkdir -p /home/vps/public_html
-wget -q -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/vps.conf"
+wget -q -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/vps.conf"
 
 # Install Xray #
 #==========#
@@ -173,19 +173,30 @@ mkdir -p /usr/local/etc/xray
 
 # // Making Certificate
 clear
-echo -e "[ ${GREEN}INFO${NC} ] Starting renew cert... " 
+echo -e "[ ${GREEN}INFO${NC} ] Starting renew cert... "
 sleep 2
 echo -e "${OKEY} Starting Generating Certificate"
-##Generate acme certificate
-curl https://get.acme.sh | sh
-alias acme.sh=~/.acme.sh/acme.sh
-/root/.acme.sh/acme.sh --upgrade --auto-upgrade
-/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-#/root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-2048
-/root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256
-/root/.acme.sh/acme.sh --install-cert -d "${domain}" --ecc \
---fullchain-file /etc/xray/xray.crt \
---key-file /etc/xray/xray.key
+## Keep a valid certificate already issued for this host; otherwise request a new one.
+certificate_valid=false
+if openssl x509 -in /etc/xray/xray.crt -noout -checkhost "$domain" >/dev/null 2>&1; then
+    certificate_public_key=$(openssl x509 -in /etc/xray/xray.crt -pubkey -noout 2>/dev/null | openssl sha256)
+    private_public_key=$(openssl pkey -in /etc/xray/xray.key -pubout 2>/dev/null | openssl sha256)
+    if [[ -n "$certificate_public_key" && "$certificate_public_key" == "$private_public_key" ]]; then
+        certificate_valid=true
+    fi
+fi
+if [[ "$certificate_valid" == true ]]; then
+    echo "Using the existing matching certificate for $domain."
+else
+    curl https://get.acme.sh | sh
+    alias acme.sh=~/.acme.sh/acme.sh
+    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
+    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+    /root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256
+    /root/.acme.sh/acme.sh --install-cert -d "${domain}" --ecc \
+    --fullchain-file /etc/xray/xray.crt \
+    --key-file /etc/xray/xray.key
+fi
 chown -R nobody:nogroup /etc/xray
 chmod 644 /etc/xray/xray.crt
 chmod 644 /etc/xray/xray.key
@@ -226,7 +237,7 @@ cat >/etc/nginx/conf.d/xray.conf <<EOF
              listen 80;
              listen [::]:80;
              listen 443 ssl http2 reuseport;
-             listen [::]:443 http2 reuseport;	
+             listen [::]:443 http2 reuseport;
              server_name 127.0.0.1 localhost;
              ssl_certificate /etc/xray/xray.crt;
              ssl_certificate_key /etc/xray/xray.key;
@@ -389,7 +400,7 @@ cat <<EOF> /etc/xray/config.json
           "decryption":"none",
             "clients": [
                {
-                 "id": "${uuid}"                 
+                 "id": "${uuid}"
 #vless
              }
           ]
@@ -466,7 +477,7 @@ cat <<EOF> /etc/xray/config.json
       "port": "$trojanws",
       "protocol": "trojan",
       "settings": {
-          "decryption":"none",		
+          "decryption":"none",
            "clients": [
               {
                  "password": "${uuid}"
@@ -502,7 +513,7 @@ cat <<EOF> /etc/xray/config.json
                "path": "/ss-ws"
            }
         }
-     },	
+     },
       {
         "listen": "127.0.0.1",
         "port": "$vlessgrpc",
@@ -583,7 +594,7 @@ cat <<EOF> /etc/xray/config.json
            "serviceName": "ss-grpc"
           }
        }
-    }	
+    }
   ],
   "outbounds": [
     {
@@ -667,7 +678,7 @@ After=network.target nss-lookup.target
 
 [Service]
 User=www-data
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE                            
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json

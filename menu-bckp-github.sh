@@ -45,8 +45,8 @@ export WARNING="${RED}\e[5m"
 export UNDERLINE="\e[4m"
 
 # // Exporting URL Host
-export Server_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/test"
-export Server1_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/limit"
+export Server_URL="raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/test"
+export Server1_URL="raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/limit"
 export Server_Port="443"
 export Server_IP="underfined"
 export Script_Mode="Stable"
@@ -173,16 +173,7 @@ mv /root/$NameUser.zip /root/user-backup/$NameUser/
 }
 
 Save_And_Exit () {
-    cd /root/user-backup
-    git config --global user.email "105465912+kenDevXD@users.noreply.github.com" &> /dev/null
-    git config --global user.name "kenDevXD" &> /dev/null
-    rm -fr .git &> /dev/null
-    git init &> /dev/null
-    git add . &> /dev/null
-    git commit -m m &> /dev/null
-    git branch -M main &> /dev/null
-    git remote add origin https://github.com/kenDevXD/userbackup
-    git push -f https://ghp_BCugzEPypFU5MNGL17w41UcWxFw4F15sYSH@github.com/kenDevXD/userbackup.git &> /dev/null
+    echo "Backup saved locally under /root/user-backup. Configure your own remote to upload it."
 }
 
 if [ ! -d "/root/user-backup/" ]; then
