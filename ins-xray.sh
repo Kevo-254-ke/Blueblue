@@ -77,7 +77,7 @@ systemctl enable chrony && systemctl restart chrony
 timedatectl set-timezone Asia/Kuala_Lumpur
 #chronyc sourcestats -v
 #chronyc tracking -v
-apt install curl pwgen openssl netcat cron -y
+apt install -y curl pwgen openssl netcat-openbsd cron
 
 # Make Folder & Log XRay & Log Trojan
 rm -fr /var/log/xray
@@ -86,7 +86,7 @@ rm -fr /home/vps/public_html
 mkdir -p /var/log/xray
 #mkdir -p /var/log/trojan
 mkdir -p /home/vps/public_html
-chown www-data.www-data /var/log/xray
+chown www-data:www-data /var/log/xray
 chown www-data.www-data /etc/xray
 chmod +x /var/log/xray
 #chmod +x /var/log/trojan
@@ -94,6 +94,8 @@ touch /var/log/xray/access.log
 touch /var/log/xray/error.log
 touch /var/log/xray/access2.log
 touch /var/log/xray/error2.log
+chown www-data:www-data /var/log/xray/*.log
+chmod 640 /var/log/xray/*.log
 # Make Log Autokill & Log Autoreboot
 rm -fr /root/log-limit.txt
 rm -fr /root/log-reboot.txt
@@ -199,7 +201,8 @@ else
 fi
 chown -R nobody:nogroup /etc/xray
 chmod 644 /etc/xray/xray.crt
-chmod 644 /etc/xray/xray.key
+chown www-data:www-data /etc/xray/xray.key
+chmod 640 /etc/xray/xray.key
 echo -e "${OKEY} Your Domain : $domain"
 
 # nginx renew ssl
@@ -672,6 +675,7 @@ EOF
 rm -fr /etc/systemd/system/xray.service.d
 rm -fr /etc/systemd/system/xray.service
 cat <<EOF> /etc/systemd/system/xray.service
+[Unit]
 Description=Xray Service
 Documentation=https://github.com/xtls
 After=network.target nss-lookup.target

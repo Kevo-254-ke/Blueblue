@@ -277,17 +277,9 @@ chmod +x /usr/bin/bbr
     dpkg -i /tmp/gotop.deb >/dev/null 2>&1
 
 
-# > Setup Crontab
-echo "0 0 * * * root xp" >> /etc/crontab
-echo "0 1 * * * root delete" >> /etc/crontab
-echo "0 2 * * * root cleaner" >> /etc/crontab
-echo "0 3 * * * root /usr/bin/xp" >> /etc/crontab
-echo "0 4 * * * root /usr/bin/delete" >> /etc/crontab
-echo "0 7 * * * root /usr/bin/cleaner" >> /etc/crontab
-echo "0 5 * * * root reboot" >> /etc/crontab
-echo "0 6 * * * root backup" >> /etc/crontab
-echo "0 23 * * * root backup" >> /etc/crontab
-echo "5 23 * * * root /usr/bin/backup" >> /etc/crontab
+# Remove schedules from previous Blueblue installs; use one managed cron file.
+sed -i -E '/^[[:space:]]*0[[:space:]]+(0|1|2|3|4|5|6|7|23)[[:space:]]+\*[[:space:]]+\*[[:space:]]+root[[:space:]]+(\/usr\/bin\/)?(xp|delete|cleaner|reboot|backup)$/d' /etc/crontab
+sed -i -E '/^[[:space:]]*5[[:space:]]+23[[:space:]]+\*[[:space:]]+\*[[:space:]]+root[[:space:]]+\/usr\/bin\/backup$/d' /etc/crontab
 cd
 
 #cat > /etc/cron.d/re_otm <<-END
@@ -299,7 +291,13 @@ cd
 cat > /etc/cron.d/xp_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-2 0 * * * root /usr/bin/xp
+0 0 * * * root /usr/bin/xp
+0 1 * * * root /usr/bin/delete
+0 2 * * * root /usr/bin/cleaner
+0 3 * * * root /usr/bin/xp
+0 4 * * * root /usr/bin/delete
+0 5 * * * root reboot
+0 7 * * * root /usr/bin/cleaner
 END
 
 cat > /etc/cron.d/cl_otm <<-END
@@ -408,7 +406,6 @@ rm -fr /root/jembot.sh
 rm -fr /root/ssh-vpn.sh
 rm -fr /root/ins-xray.sh
 rm -fr /root/setup.sh
-rm -fr /root/domain
 history -c
 
 read -p "$( echo -e "Press ${orange}[ ${NC}${green}Enter${NC} ${CYAN}]${NC} For Reboot") "

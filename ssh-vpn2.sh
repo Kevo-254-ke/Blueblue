@@ -265,9 +265,12 @@ systemctl restart ssh >/dev/null 2>&1
 # install dropbear
 sleep 1
 echo -e "[ ${green}INFO$NC ] Settings Dropbear"
-sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109"/g' /etc/default/dropbear
+cat > /etc/default/dropbear <<'DROPBEAR_EOF'
+NO_START=0
+DROPBEAR_PORT=143
+DROPBEAR_RECEIVE_WINDOW=65536
+DROPBEAR_EXTRA_ARGS="-p 109"
+DROPBEAR_EOF
 systemctl daemon-reload >/dev/null 2>&1
 systemctl start dropbear >/dev/null 2>&1
 systemctl restart dropbear >/dev/null 2>&1
@@ -279,18 +282,9 @@ echo "/bin/false" >> /etc/shells
 echo "/usr/sbin/nologin" >> /etc/shells
 fi
 
-# Install Stunnel5
-cd /root/
-wget -q "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/stunnel5.zip"
-unzip stunnel5.zip
-cd /root/stunnel
-chmod +x configure
-./configure
-make
-make install
-cd /root
-rm -r -f stunnel
-rm -f stunnel5.zip
+# Install the Ubuntu Stunnel package (the vendored 2022 source does not build with OpenSSL 3).
+apt-get install -y stunnel4
+ln -sf /usr/bin/stunnel4 /usr/local/bin/stunnel
 rm -fr /etc/stunnel5
 mkdir -p /etc/stunnel5
 chmod 644 /etc/stunnel5
@@ -355,7 +349,7 @@ wget -q -O /etc/init.d/stunnel5 "https://raw.githubusercontent.com/Kevo-254-ke/B
 # Ubah Izin Akses
 #chmod 600 /etc/stunnel5/stunnel5.pem
 chmod +x /etc/init.d/stunnel5
-cp -r /usr/local/bin/stunnel /usr/local/bin/stunnel5
+ln -sf /usr/bin/stunnel4 /usr/local/bin/stunnel5
 #mv /usr/local/bin/stunnel /usr/local/bin/stunnel5
 
 # Remove File
@@ -557,4 +551,4 @@ sleep 5
 clear
 rm -fr /root/key.pem >/dev/null 2>&1
 rm -fr /root/cert.pem >/dev/null 2>&1
-rm -fr /root/ssh-vpn.sh >/dev/null 2>&1�
+rm -f /root/ssh-vpn.sh >/dev/null 2>&1

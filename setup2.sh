@@ -57,6 +57,7 @@ export VERSION="1.1"
  
 # // Exporint IP AddressInformation
 export IP=$( curl -s https://ipinfo.io/ip/ )
+DOMAIN="devkevo.dpdns.org"
 
 # // Set Time To Kuala_Lumpur / GMT +8
 ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
@@ -86,6 +87,23 @@ exit 1
 fi
 clear
 fi
+
+# Preserve a matching host certificate before the clean install removes /etc/xray.
+if openssl x509 -in /etc/xray/xray.crt -noout -checkhost "$DOMAIN" >/dev/null 2>&1; then
+    CERT_PUBLIC_KEY=$(openssl x509 -in /etc/xray/xray.crt -pubkey -noout 2>/dev/null | openssl sha256)
+    KEY_PUBLIC_KEY=$(openssl pkey -in /etc/xray/xray.key -pubout 2>/dev/null | openssl sha256)
+    if [[ -n "$CERT_PUBLIC_KEY" && "$CERT_PUBLIC_KEY" == "$KEY_PUBLIC_KEY" ]]; then
+        install -d -m 700 /root/.blueblue-ssl
+        install -m 644 /etc/xray/xray.crt /root/.blueblue-ssl/xray.crt
+        install -m 600 /etc/xray/xray.key /root/.blueblue-ssl/xray.key
+    fi
+fi
+systemctl stop ssh-ws.service xray.service ws-stunnel.service stunnel5.service rc-local.service >/dev/null 2>&1 || true
+systemctl disable ssh-ws.service xray.service ws-stunnel.service stunnel5.service rc-local.service >/dev/null 2>&1 || true
+pkill -x badvpn-udpgw >/dev/null 2>&1 || true
+rm -f /etc/systemd/system/ssh-ws.service /etc/systemd/system/xray@.service /usr/local/etc/ssh-ws.py
+systemctl daemon-reload >/dev/null 2>&1 || true
+
 echo -e "${GREEN}Starting Installation............${NC}"
 # // Go To Root Directory
 cd /root/
@@ -105,8 +123,8 @@ apt autoremove -y
 apt update -y
 
 # // Install Requirement Tools
-apt-get --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper python2 tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip wget vim net-tools curl nano sed screen gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent
-apt-get --reinstall --fix-missing install -y libreadline-dev zlib1g-dev libssl-dev python2 screen curl jq bzip2 gzip coreutils rsyslog iftop htop zip unzip net-tools sed gnupg gnupg1 bc sudo apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof openssl easy-rsa fail2ban tmux vnstat dropbear libsqlite3-dev socat cron bash-completion ntpdate xz-utils sudo apt-transport-https gnupg2 gnupg1 dnsutils lsb-release chrony
+apt-get --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper python3 python-is-python3 python3-lib2to3 tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip vim curl nano sed gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent
+apt-get --reinstall --fix-missing install -y libreadline-dev zlib1g-dev libssl-dev python3 python-is-python3 python3-lib2to3 screen curl jq bzip2 gzip coreutils rsyslog iftop htop zip unzip net-tools sed gnupg gnupg1 bc sudo apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof openssl easy-rsa fail2ban tmux vnstat dropbear libsqlite3-dev socat cron bash-completion ntpdate xz-utils sudo apt-transport-https gnupg2 dnsutils lsb-release chrony
 gem install lolcat
 
 # // Update & Upgrade
@@ -136,13 +154,19 @@ mkdir -p /var/lib/scrz-prem/
 mkdir -p /usr/bin/xray
 mkdir -p /etc/xray
 mkdir -p /usr/local/etc/xray
+if [[ -s /root/.blueblue-ssl/xray.crt && -s /root/.blueblue-ssl/xray.key ]]; then
+    install -m 644 /root/.blueblue-ssl/xray.crt /etc/xray/xray.crt
+    install -m 600 /root/.blueblue-ssl/xray.key /etc/xray/xray.key
+fi
 
 #rm -fr /etc/xray/domain
 # // String / Request Data
 mkdir -p /var/lib/scrz-prem >/dev/null 2>&1
-echo "IP=$host" >> /var/lib/scrz-prem/ipvps.conf
-echo $host > /etc/xray/domain
-wget https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/cf.sh && chmod +x cf.sh && ./cf.sh
+echo "IP=$IP" > /var/lib/scrz-prem/ipvps.conf
+printf '%s\n' "$DOMAIN" > /etc/xray/domain
+mkdir -p /etc/v2ray
+printf '%s\n' "$DOMAIN" > /etc/v2ray/domain
+printf '%s\n' "$DOMAIN" > /root/domain
 
 sleep 2
 
@@ -151,26 +175,26 @@ echo -e "$white\033[0;34m┌─────────────────�
 echo -e "                          ⇱ INSTALL DOMAIN ⇲            "
 echo -e "$white\033[0;34m└─────────────────────────────────────────┘${NC}"
 sleep 1
-wget https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/cf.sh && chmod +x cf.sh && ./cf.sh
+# Host is configured above; skip cf.sh because it expects a Cloudflare API token.
 #install jembot
 echo -e "$white\033[0;34m┌─────────────────────────────────────────┐${NC}"
 echo -e " \E[41;1;39m           ⇱ Install Jembot ⇲            \E[0m$NC"
 echo -e "$white\033[0;34m└─────────────────────────────────────────┘${NC}"
 sleep 1 
-wget -q https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/jembot.sh && chmod +x jembot.sh && ./jembot.sh
+cp /root/Blueblue/jembot.sh ./jembot.sh && chmod +x jembot.sh && ./jembot.sh
 #install ssh-vpn
 echo -e "$white\033[0;34m┌─────────────────────────────────────────┐${NC}"
 echo -e " \E[41;1;39m          ⇱ Install SSH / WS ⇲           \E[0m$NC"
 echo -e "$white\033[0;34m└─────────────────────────────────────────┘${NC}"
 sleep 1
-wget -q https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/ssh-vpn2.sh && chmod +x ssh-vpn2.sh && ./ssh-vpn2.sh
+cp /root/Blueblue/ssh-vpn2.sh ./ssh-vpn2.sh && chmod +x ssh-vpn2.sh && ./ssh-vpn2.sh
 #install ins-xray
 echo -e "$white\033[0;34m┌─────────────────────────────────────────┐${NC}"
 echo -e " \E[41;1;39m            ⇱ Install Xray ⇲             \E[0m$NC"
 echo -e "$white\033[0;34m└─────────────────────────────────────────┘${NC}"
 sleep 1 
-wget -q https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/ins-xray.sh && chmod +x ins-xray.sh && ./ins-xray.sh
-wget -q https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/set-br.sh && chmod +x set-br.sh && ./set-br.sh
+cp /root/Blueblue/ins-xray.sh ./ins-xray.sh && chmod +x ins-xray.sh && ./ins-xray.sh
+cp /root/Blueblue/set-br.sh ./set-br.sh && chmod +x set-br.sh && ./set-br.sh
 
 # // Download Data
 echo -e "${GREEN}Download Data${NC}"
@@ -257,16 +281,9 @@ chmod +x /usr/bin/bbr
 
 # > Setup Crontab
 
-echo "0 0 * * * root xp" >> /etc/crontab
-echo "0 1 * * * root delete" >> /etc/crontab
-echo "0 2 * * * root cleaner" >> /etc/crontab
-echo "0 3 * * * root /usr/bin/xp" >> /etc/crontab
-echo "0 4 * * * root /usr/bin/delete" >> /etc/crontab
-echo "0 7 * * * root /usr/bin/cleaner" >> /etc/crontab
-echo "0 5 * * * root reboot" >> /etc/crontab
-echo "0 6 * * * root backup" >> /etc/crontab
-echo "0 23 * * * root backup" >> /etc/crontab
-echo "5 23 * * * root /usr/bin/backup" >> /etc/crontab
+# Remove schedules from previous Blueblue installs; use one managed cron file.
+sed -i -E '/^[[:space:]]*0[[:space:]]+(0|1|2|3|4|5|6|7|23)[[:space:]]+\*[[:space:]]+\*[[:space:]]+root[[:space:]]+(\/usr\/bin\/)?(xp|delete|cleaner|reboot|backup)$/d' /etc/crontab
+sed -i -E '/^[[:space:]]*5[[:space:]]+23[[:space:]]+\*[[:space:]]+\*[[:space:]]+root[[:space:]]+\/usr\/bin\/backup$/d' /etc/crontab
 cd
 
 #cat > /etc/cron.d/re_otm <<-END
@@ -278,7 +295,13 @@ cd
 cat > /etc/cron.d/xp_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-2 0 * * * root /usr/bin/xp
+0 0 * * * root /usr/bin/xp
+0 1 * * * root /usr/bin/delete
+0 2 * * * root /usr/bin/cleaner
+0 3 * * * root /usr/bin/xp
+0 4 * * * root /usr/bin/delete
+0 5 * * * root reboot
+0 7 * * * root /usr/bin/cleaner
 END
 
 cat > /etc/cron.d/cl_otm <<-END
@@ -388,7 +411,6 @@ rm -fr /root/jembot.sh
 rm -fr /root/ssh-vpn2.sh
 rm -fr /root/ins-xray.sh
 rm -fr /root/setup2.sh
-rm -fr /root/domain
 history -c
 
 read -p "$( echo -e "Press ${orange}[ ${NC}${green}Enter${NC} ${CYAN}]${NC} For Reboot") "

@@ -89,18 +89,13 @@ echo "Progress..."
 sleep 2
 
 /etc/init.d/vnstat restart >/dev/null 2>&1
-wget -q https://github.com/NevermoreSSH/vnstat/releases/download/vnstat/vnstat-2.6.tar.gz
-tar zxvf vnstat-2.6.tar.gz
-cd vnstat-2.6
-./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1 && make >/dev/null 2>&1 && make install >/dev/null 2>&1
-cd
-vnstat -u -i $NET
-sed -i 's/Interface "'""eth0""'"/Interface "'""$NET""'"/g' /etc/vnstat.conf
+NET=$(ip -o route show default | awk '{print $5; exit}')
+if [[ -n "$NET" ]]; then
+    vnstat --add -i "$NET" >/dev/null 2>&1 || true
+fi
 chown vnstat:vnstat /var/lib/vnstat -R
 systemctl enable vnstat >/dev/null 2>&1
-/etc/init.d/vnstat restart >/dev/null 2>&1
-rm -f /root/vnstat-2.6.tar.gz >/dev/null 2>&1
-rm -rf /root/vnstat-2.6 >/dev/null 2>&1
+systemctl restart vnstat >/dev/null 2>&1
 
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
 yellow "JEMBOOT successfully installed..."
