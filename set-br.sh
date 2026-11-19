@@ -34,23 +34,10 @@ NC='\e[0m'
 green() { echo -e "\\033[32;1m${*}\\033[0m"; }
 red() { echo -e "\\033[31;1m${*}\\033[0m"; }
 
-#curl https://rclone.org/install.sh | bash
-apt install -y rclone
-printf "q\n" | rclone config
-# Configure your own rclone remote before using remote backup and restore.
-git clone  https://github.com/MrMan21/wondershaper.git
-cd wondershaper
-make install
-cd
-rm -rf wondershaper
-cd /usr/bin
-wget -O backup "https://${Server_URL}/backup.sh"
-wget -O restore "https://${Server_URL}/restore.sh"
-wget -O cleaner "https://${Server_URL}/logcleaner.sh"
-chmod +x /usr/bin/backup
-chmod +x /usr/bin/restore
-chmod +x /usr/bin/cleaner
-cd
+apt-get install -y rclone wondershaper
+install -m 0755 /root/Blueblue/backup.sh /usr/bin/backup
+install -m 0755 /root/Blueblue/restore.sh /usr/bin/restore
+install -m 0755 /root/Blueblue/logcleaner.sh /usr/bin/cleaner
 if [ ! -f "/etc/cron.d/cleaner" ]; then
 cat> /etc/cron.d/cleaner << END
 SHELL=/bin/sh
@@ -59,4 +46,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 END
 fi
 service cron restart > /dev/null 2>&1
-rm -f /root/set-br.sh
+
+
+# Configure an rclone remote with `rclone config` before using remote backups.

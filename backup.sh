@@ -18,8 +18,12 @@ IP=$(curl -sS ipv4.icanhazip.com)
 IP=$(curl -sS ifconfig.me )
 date=$(date +"%Y-%m-%d-%H:%M:%S")
 domain=$(cat /etc/xray/domain)
+if ! command -v rclone >/dev/null 2>&1 || ! rclone listremotes 2>/dev/null | grep -qx 'dr:'; then
+    echo "Remote backup is not configured. Run 'rclone config' and create a remote named dr first." >&2
+    exit 1
+fi
 clear
-echo " VPS Data Backup By NevermoreSSH "
+echo " Dev Kevo VPS Data Backup "
 sleep 1
 echo -e "[ ${green}INFO${NC} ] Processing . . . "
 mkdir -p /root/backup
@@ -46,8 +50,8 @@ url=$(rclone link dr:backup/$IP-$date-$domain-blueblue.zip)
 id=(`echo $url | grep '^https' | cut -d'=' -f2`)
 link="https://drive.google.com/u/4/uc?id=${id}&export=download"
 clear
-echo -e "\033[1;37mVPS Data Backup By NevermoreSSH\033[0m
-\033[1;37mTelegram : https://t.me/todfix667 / @NevermoreSSH\033[0m"
+echo -e "\033[1;37mDev Kevo VPS Data Backup\033[0m
+\033[1;37mRemote storage is configured by the server owner.\033[0m"
 echo ""
 echo "Please Copy Link Below & Save In Notepad"
 echo ""

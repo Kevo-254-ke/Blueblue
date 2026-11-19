@@ -61,16 +61,6 @@ echo ""
 echo -e "[ ${green}INFO${NC} ] VPS Data Restore Complete !"
 echo ""
 echo -e "[ ${green}INFO${NC} ] Back to menu . . . "
-systemctl restart nginx
-systemctl restart xray.service
-systemctl restart xray@none.service
-systemctl restart xray@vless.service
-systemctl restart xray@vnone.service
-systemctl restart xray@trojanws.service
-systemctl restart xray@trnone.service
-systemctl restart xray@xtrojan.service
-systemctl restart xray@trojan.service
-service cron restart
+systemctl restart xray.service nginx.service cron.service
 sleep 5
-system
-clear
+exec menu

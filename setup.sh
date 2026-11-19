@@ -5,6 +5,19 @@ if [ "${EUID}" -ne 0 ]; then
 		echo -e "${EROR} Please Run This Script As Root User !"
 		exit 1
 fi
+if ! command -v apt-get >/dev/null 2>&1 || [[ ! -r /etc/os-release ]]; then
+		printf 'Dev Kevo setup supports Debian or Ubuntu systems using apt.\n' >&2
+		exit 1
+fi
+. /etc/os-release
+if [[ " ${ID:-} ${ID_LIKE:-} " != *debian* && " ${ID:-} ${ID_LIKE:-} " != *ubuntu* ]]; then
+		printf 'Dev Kevo setup supports Debian or Ubuntu systems using apt. Detected: %s\n' "${PRETTY_NAME:-unknown}" >&2
+		exit 1
+fi
+if [[ "$(uname -m)" != x86_64 && "$(uname -m)" != amd64 ]]; then
+		printf 'Dev Kevo setup currently requires 64-bit x86 (amd64).\n' >&2
+		exit 1
+fi
 clear
 # // Exporting Language to UTF-8
 export LANG='en_US.UTF-8'
@@ -147,9 +160,9 @@ apt autoremove -y
 apt update -y
 
 # // Install Requirement Tools
-apt-get --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper python3 python-is-python3 python3-lib2to3 tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip vim curl nano sed gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent
-apt-get --reinstall --fix-missing install -y libreadline-dev zlib1g-dev libssl-dev python3 python-is-python3 python3-lib2to3 screen curl jq bzip2 gzip coreutils rsyslog iftop htop zip unzip net-tools sed gnupg gnupg1 bc sudo apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof openssl easy-rsa fail2ban tmux vnstat dropbear libsqlite3-dev socat cron bash-completion ntpdate xz-utils sudo apt-transport-https gnupg2 dnsutils lsb-release chrony
-gem install lolcat
+apt-get --reinstall --fix-missing install -y ca-certificates sudo dpkg psmisc socat jq ruby wondershaper python3 python-is-python3 python3-lib2to3 tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip vim curl nano sed gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent
+apt-get --reinstall --fix-missing install -y ca-certificates libreadline-dev zlib1g-dev libssl-dev python3 python-is-python3 python3-lib2to3 screen curl jq bzip2 gzip coreutils rsyslog iftop htop zip unzip net-tools sed gnupg gnupg1 bc sudo apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof openssl easy-rsa fail2ban tmux vnstat dropbear libsqlite3-dev socat cron bash-completion ntpdate xz-utils sudo apt-transport-https gnupg2 dnsutils lsb-release chrony netcat-openbsd resolvconf
+gem install lolcat --no-document
 
 # // Update & Upgrade
 apt update -y
@@ -222,38 +235,38 @@ cp /root/Blueblue/set-br.sh ./set-br.sh && chmod +x set-br.sh && ./set-br.sh
 
 # // Download Data
 echo -e "${GREEN}Download Data${NC}"
-wget -q -O /usr/bin/add-ws "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-ws.sh"
-wget -q -O /usr/bin/add-ssws "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-ssws.sh"
-wget -q -O /usr/bin/add-socks "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-socks.sh"
-wget -q -O /usr/bin/add-vless "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-vless.sh"
-wget -q -O /usr/bin/add-tr "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-tr.sh"
-wget -q -O /usr/bin/add-trgo "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/add-trgo.sh"
-wget -q -O /usr/bin/autoreboot "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/autoreboot.sh"
-wget -q -O /usr/bin/restart "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/restart.sh"
-wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/tendang.sh"
-wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/clearlog.sh"
-wget -q -O /usr/bin/running "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/running.sh"
-wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/cek-trafik.sh"
-wget -q -O /usr/bin/cek-speed "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/speedtes_cli.py"
-wget -q -O /usr/bin/cek-bandwidth "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/cek-bandwidth.sh"
-wget -q -O /usr/bin/cek-ram "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/ram.sh"
-wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/limit-speed.sh"
-wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-vless.sh"
-wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-vmess.sh"
-wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-socks.sh"
-wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-ss.sh"
-wget -q -O /usr/bin/menu-trojan "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-trojan.sh"
-wget -q -O /usr/bin/menu-trgo "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-trgo.sh"
-wget -q -O /usr/bin/menu-ssh "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu-ssh.sh"
-wget -q -O /usr/bin/usernew "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/usernew.sh"
+install -m 0755 /root/Blueblue/add-ws.sh /usr/bin/add-ws
+install -m 0755 /root/Blueblue/add-ssws.sh /usr/bin/add-ssws
+install -m 0755 /root/Blueblue/add-socks.sh /usr/bin/add-socks
+install -m 0755 /root/Blueblue/add-vless.sh /usr/bin/add-vless
+install -m 0755 /root/Blueblue/add-tr.sh /usr/bin/add-tr
+install -m 0755 /root/Blueblue/add-trgo.sh /usr/bin/add-trgo
+install -m 0755 /root/Blueblue/autoreboot.sh /usr/bin/autoreboot
+install -m 0755 /root/Blueblue/restart.sh /usr/bin/restart
+install -m 0755 /root/Blueblue/tendang.sh /usr/bin/tendang
+install -m 0755 /root/Blueblue/clearlog.sh /usr/bin/clearlog
+install -m 0755 /root/Blueblue/running.sh /usr/bin/running
+install -m 0755 /root/Blueblue/cek-trafik.sh /usr/bin/cek-trafik
+install -m 0755 /root/Blueblue/speedtes_cli.py /usr/bin/cek-speed
+install -m 0755 /root/Blueblue/cek-bandwidth.sh /usr/bin/cek-bandwidth
+install -m 0755 /root/Blueblue/ram.sh /usr/bin/cek-ram
+install -m 0755 /root/Blueblue/limit-speed.sh /usr/bin/limit-speed
+install -m 0755 /root/Blueblue/menu-vless.sh /usr/bin/menu-vless
+install -m 0755 /root/Blueblue/menu-vmess.sh /usr/bin/menu-vmess
+install -m 0755 /root/Blueblue/menu-socks.sh /usr/bin/menu-socks
+install -m 0755 /root/Blueblue/menu-ss.sh /usr/bin/menu-ss
+install -m 0755 /root/Blueblue/menu-trojan.sh /usr/bin/menu-trojan
+install -m 0755 /root/Blueblue/menu-trgo.sh /usr/bin/menu-trgo
+install -m 0755 /root/Blueblue/menu-ssh.sh /usr/bin/menu-ssh
+install -m 0755 /root/Blueblue/usernew.sh /usr/bin/usernew
 # wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu.sh"
-wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/menu4.sh"
-wget -q -O /usr/bin/wbm "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/webmin.sh"
-wget -q -O /usr/bin/xp "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/xp.sh"
-wget -q -O /usr/bin/update "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/update.sh"
-wget -q -O /usr/bin/dns "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/dns.sh"
-wget -q -O /usr/bin/netf "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/netf.sh"
-wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/bbr.sh"
+install -m 0755 /root/Blueblue/menu4.sh /usr/bin/menu
+install -m 0755 /root/Blueblue/xraychanger.sh /usr/bin/xraychanger
+install -m 0755 /root/Blueblue/webmin.sh /usr/bin/wbm
+install -m 0755 /root/Blueblue/xp.sh /usr/bin/xp
+install -m 0755 /root/Blueblue/dns.sh /usr/bin/dns
+install -m 0755 /root/Blueblue/netf.sh /usr/bin/netf
+install -m 0755 /root/Blueblue/bbr.sh /usr/bin/bbr
 #wget -q -O /usr/bin/del-xrays "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/del-xrays.sh"
 #wget -q -O /usr/bin/user-xrays "https://raw.githubusercontent.com/Kevo-254-ke/Blueblue/main/user-xrays.sh"
 chmod +x /usr/bin/add-ws
@@ -283,19 +296,11 @@ chmod +x /usr/bin/menu-ssh
 chmod +x /usr/bin/menu
 chmod +x /usr/bin/wbm
 chmod +x /usr/bin/xp
-chmod +x /usr/bin/update
 chmod +x /usr/bin/dns
 chmod +x /usr/bin/netf
 chmod +x /usr/bin/bbr
 #chmod +x /usr/bin/del-xrays
 #chmod +x /usr/bin/user-xrays
-
-
-# > install gotop
-    gotop_latest="$(curl -s https://api.github.com/repos/NevermoreSSH/gotop/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-    gotop_link="https://github.com/NevermoreSSH/gotop/releases/download/gotopV4/gotop_v4.2.0_linux_amd64.deb"
-    curl -sL "$gotop_link" -o /tmp/gotop.deb
-    dpkg -i /tmp/gotop.deb >/dev/null 2>&1
 
 
 # Remove schedules from previous Blueblue installs; use one managed cron file.

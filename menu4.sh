@@ -290,11 +290,11 @@ case $opt in
 19) clear ; wbm ;;
 20) clear ; cat /root/log-install.txt ;;
 21) clear ; clearlog ;;
-22) clear ; gotop ;;
+22) clear ; if command -v gotop >/dev/null 2>&1; then gotop; else htop; fi ;;
 23) clear ; dns ;;
 24) clear ; netf ;;
 25) clear ; tendang ;;
-55) clear ; wget -q -O /usr/bin/xraychanger "https://raw.githubusercontent.com/NevermoreSSH/Xcore-custompath/main/xraychanger.sh" && chmod +x /usr/bin/xraychanger && xraychanger ;;
+55) clear ; if command -v xraychanger >/dev/null 2>&1; then xraychanger; else echo "XRAY core manager is missing. Run the setup script again to install it."; read -r -p "Press Enter to return to the menu"; menu; fi ;;
 66) clear ; bbr ;;
 77) clear ; wget -q -O /usr/bin/swapram "https://raw.githubusercontent.com/NevermoreSSH/swapram/main/swapram.sh" && chmod +x /usr/bin/swapram && swapram ;;
 88) clear ; backup ;;

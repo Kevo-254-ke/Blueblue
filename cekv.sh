@@ -37,15 +37,13 @@ if [[ $ver1 == $ver2 ]]; then
         echo -e "${LIGHT} ${BOLD}Your Script Last Update ${NC}"
         skip='true'
     else
-        echo -e ${LIGHT} ${BOLD}Pacth $ver1 Already To Update....! ${NC}"
+        echo -e "${LIGHT} ${BOLD}Patch $ver1 is available to update.${NC}"
         echo -ne "${CYAN} ${BOLD}Update Now Or Later (y/n) ? ${NC}"
         read answer
         if [ "$answer" == "${answer#[Yy]}" ] ;then
         exit 0
     fi
         echo -e "${LIGHT} ${BOLD} Downloading Data....! ${NC}"
-cat > /home/.ver << END
-3.0
-END        
+printf '3.0\n' > /home/.ver
         
  fi
