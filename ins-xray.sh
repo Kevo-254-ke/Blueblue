@@ -42,11 +42,10 @@ if [ "${EUID}" -ne 0 ]; then
 		exit 1
 fi
 
-# // Exporting IP Address
-export IP=$( curl -s https://ipinfo.io/ip/ )
-IP=$(curl -s ipinfo.io/ip )
-IP=$(curl -sS ipv4.icanhazip.com)
-IP=$(curl -sS ifconfig.me )
+# Preserve values supplied by setup; detect the public IP only when run standalone.
+if [[ -z "$IP" ]]; then
+    IP=$(curl -4fsS --max-time 8 https://api.ipify.org 2>/dev/null || true)
+fi
 
 # // Exporting Network Interface
 export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
@@ -74,7 +73,8 @@ apt -y install chrony
 timedatectl set-ntp true
 #systemctl enable chronyd && systemctl restart chronyd
 systemctl enable chrony && systemctl restart chrony
-timedatectl set-timezone Asia/Kuala_Lumpur
+TIMEZONE=${TIMEZONE:-$(cat /etc/timezone 2>/dev/null || echo UTC)}
+timedatectl set-timezone "$TIMEZONE"
 #chronyc sourcestats -v
 #chronyc tracking -v
 apt install -y curl pwgen openssl netcat-openbsd cron

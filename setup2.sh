@@ -55,12 +55,33 @@ export Auther=".geovpn"
 # // Exporting Script Version
 export VERSION="1.1"
  
-# // Exporint IP AddressInformation
-export IP=$( curl -s https://ipinfo.io/ip/ )
-DOMAIN="devkevo.dpdns.org"
+# Ask for the server details that vary between installations.
+default_ip=$(curl -4fsS --max-time 8 https://api.ipify.org 2>/dev/null || true)
+default_timezone=$(cat /etc/timezone 2>/dev/null || true)
+[[ -n "$default_timezone" ]] || default_timezone=$(timedatectl show -p Timezone --value 2>/dev/null || true)
+[[ -n "$default_timezone" ]] || default_timezone=UTC
 
-# // Set Time To Kuala_Lumpur / GMT +8
-ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
+while true; do
+    read -r -p "Server domain (DNS A record should point to this VPS): " DOMAIN
+    DOMAIN=${DOMAIN,,}
+    if [[ "$DOMAIN" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; then break; fi
+    echo "Enter a valid hostname, for example vpn.example.com."
+done
+while true; do
+    read -r -p "Public IPv4 address [${default_ip}]: " IP
+    IP=${IP:-$default_ip}
+    if [[ "$IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] && awk -F. '($1<=255)&&($2<=255)&&($3<=255)&&($4<=255)' <<< "$IP" | grep -q 1; then break; fi
+    echo "Enter a valid public IPv4 address."
+done
+while true; do
+    read -r -p "Timezone [${default_timezone}]: " TIMEZONE
+    TIMEZONE=${TIMEZONE:-$default_timezone}
+    if [[ -e "/usr/share/zoneinfo/${TIMEZONE}" && "$TIMEZONE" != /* && "$TIMEZONE" != *..* ]]; then break; fi
+    echo "Enter a timezone from /usr/share/zoneinfo (for example Europe/London)."
+done
+export DOMAIN IP TIMEZONE
+ln -sf "/usr/share/zoneinfo/${TIMEZONE}" /etc/localtime
+printf '%s\n' "$TIMEZONE" > /etc/timezone
 
 # // cek old script
 if [[ -r /etc/xray/domain ]]; then
@@ -358,7 +379,7 @@ echo "1.1" >> /home/.ver
 rm -fr /root/limit
 curl -sS ifconfig.me > /etc/myipvps
 echo " "
-echo "====================-[ NevermoreSSH TUNNELING ]-===================="
+echo "====================-[ Dev Kevo Custom Script ]-===================="
 echo ""
 echo "------------------------------------------------------------"
 echo ""
@@ -382,7 +403,7 @@ echo "   - Trojan GO               : 443" | tee -a log-install.txt
 echo "   - Sodosok WS/GRPC         : 443" | tee -a log-install.txt
 echo ""  | tee -a log-install.txt
 echo "   >>> Server Information & Other Features"  | tee -a log-install.txt
-echo "   - Timezone                : Asia/Kuala_Lumpur (GMT +8)"  | tee -a log-install.txt
+echo "   - Timezone                : ${TIMEZONE}"  | tee -a log-install.txt
 echo "   - Fail2Ban                : [ON]"  | tee -a log-install.txt
 echo "   - Dflate                  : [ON]"  | tee -a log-install.txt
 echo "   - IPtables                : [ON]"  | tee -a log-install.txt
@@ -402,7 +423,7 @@ echo ""
 echo ""
 echo "------------------------------------------------------------"
 echo ""
-echo "===============-[ Script Mod By NEVERMORESSH TUNNELING ]-==============="
+echo "===============-[ Dev Kevo ]-==============="
 echo -e ""
 echo ""
 echo "" | tee -a log-install.txt

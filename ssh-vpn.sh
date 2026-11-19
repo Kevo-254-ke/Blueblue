@@ -65,8 +65,7 @@ if [ "${EUID}" -ne 0 ]; then
 		exit 1
 fi
 
-# // Exporting IP Address
-export IP=$( curl -s https://ipinfo.io/ip/ )
+# Keep the public address selected by setup; detect one only when run standalone.
 
 # // Exporting Network Interface
 export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
@@ -75,9 +74,9 @@ export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
 
 export DEBIAN_FRONTEND=noninteractive
 MYIP=$(curl -sS ifconfig.me);
-IP=$(curl -s ipinfo.io/ip )
-IP=$(curl -sS ipv4.icanhazip.com)
-IP=$(curl -sS ifconfig.me )
+if [[ -z "$IP" ]]; then
+    IP=$(curl -4fsS --max-time 8 https://api.ipify.org 2>/dev/null || true)
+fi
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 NET=$(ip -o $ANU -4 route show to default | awk '{print $5}');
 source /etc/os-release
@@ -207,8 +206,10 @@ sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local >/d
 
 # set time GMT +8
 sleep 1
-echo -e "[ ${green}INFO$NC ] Set zona local time to Asia/Kuala_lumpur GMT+8"
-ln -fs /usr/share/zoneinfo/Asia/Kuala_lumpur /etc/localtime
+TIMEZONE=${TIMEZONE:-$(cat /etc/timezone 2>/dev/null || echo UTC)}
+echo -e "[ ${green}INFO$NC ] Set local timezone to ${TIMEZONE}"
+ln -sf "/usr/share/zoneinfo/${TIMEZONE}" /etc/localtime
+printf '%s\n' "$TIMEZONE" > /etc/timezone
 
 # set locale
 sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
