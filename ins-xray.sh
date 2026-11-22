@@ -53,17 +53,16 @@ export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
 
 clear
 source /var/lib/scrz-prem/ipvps.conf
-if [[ "$IP" = "" ]]; then
-domain=$(cat /etc/xray/domain)
-else
-domain=$IP
-fi
+domain=$(cat /etc/xray/domain 2>/dev/null)
+if [[ -z "$domain" ]]; then domain=$(cat /root/domain 2>/dev/null); fi
 
 echo -e "[ ${GREEN}INFO${NC} ] Checking... "
 sleep 1
 echo -e "[ ${GREEN}INFO$NC ] Setting ntpdate"
 sleep 1
-domain=$(cat /root/domain)
+domain=$(cat /etc/xray/domain 2>/dev/null)
+if [[ -z "$domain" ]]; then domain=$(cat /root/domain 2>/dev/null); fi
+if [[ -z "$domain" ]]; then echo "Server domain is not configured." >&2; exit 1; fi
 apt install iptables iptables-persistent -y
 apt install curl socat xz-utils wget apt-transport-https gnupg gnupg2 gnupg1 dnsutils lsb-release -y
 apt install socat cron bash-completion ntpdate -y

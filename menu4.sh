@@ -134,9 +134,9 @@ echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━�
 read -n 1 -s -r -p "Press any key to back on menu"
 setting-menu
 else
-rm -fr /etc/xray/domain
-echo "IP=$host" > /var/lib/scrz-prem/ipvps.conf
-echo $host > /etc/xray/domain
+printf '%s\n' "$host" > /etc/xray/domain
+printf '%s\n' "$host" > /etc/v2ray/domain
+printf '%s\n' "$host" > /root/domain
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo "Dont forget to renew gen-ssl"
 echo ""
@@ -148,7 +148,7 @@ function genssl(){
 clear
 systemctl stop nginx
 systemctl stop xray
-domain=$(cat /var/lib/scrz-prem/ipvps.conf | cut -d'=' -f2)
+domain=$(cat /etc/xray/domain)
 Cek=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
 if [[ ! -z "$Cek" ]]; then
 sleep 1

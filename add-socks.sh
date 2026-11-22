@@ -65,12 +65,9 @@ export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
 clear
 sspwd=$(cat /etc/xray/passwd)
 clear
-source /var/lib/scrz-prem/ipvps.conf
-if [[ "$IP" = "" ]]; then
-domain=$(cat /etc/xray/domain)
-else
-domain=$IP
-fi
+domain=$(cat /etc/xray/domain 2>/dev/null)
+if [[ -z "$domain" ]]; then domain=$(cat /root/domain 2>/dev/null); fi
+if [[ -z "$domain" ]]; then echo "Server domain is not configured." >&2; exit 1; fi
 
 
 tls="$(cat ~/log-install.txt | grep -w "Sodosok WS/GRPC" | cut -d: -f2|sed 's/ //g')"

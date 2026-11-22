@@ -70,6 +70,7 @@ domen=`cat /etc/xray/domain`
 else
 domen=`cat /etc/v2ray/domain`
 fi
+domain="$domen"
 portsshws=`cat /root/log-install.txt | grep -w "SSH Websocket" | cut -d: -f2 | awk '{print $1}'`
 wsssl=`cat /root/log-install.txt | grep -w "SSH SSL Websocket" | cut -d: -f2 | awk '{print $1}'`
 
