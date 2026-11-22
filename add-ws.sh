@@ -78,7 +78,7 @@ echo -e "\\E[0;41;36m      Add Xray/Vmess Account      \E[0m"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
 		read -rp "User: " -e user
-		CLIENT_EXISTS=$(grep -w $user /etc/xray/config.json | wc -l)
+		CLIENT_EXISTS=$(grep -E "^(#vms|#vmsg|###) ${user} " /etc/xray/config.json | wc -l)
 
 		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
 clear
