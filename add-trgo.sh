@@ -71,14 +71,16 @@ domain=$(cat /etc/xray/domain 2>/dev/null)
 if [[ -z "$domain" ]]; then domain=$(cat /root/domain 2>/dev/null); fi
 if [[ -z "$domain" ]]; then echo "Server domain is not configured." >&2; exit 1; fi
 trgo="$(cat ~/log-install.txt | grep -w "Trojan GO" | cut -d: -f2|sed 's/ //g')"
+user=""
+user_EXISTS=1
 until [[ $user =~ ^[a-zA-Z0-9_]+$ && ${user_EXISTS} == '0' ]]; do
 		read -rp "User : " -e user
 		user_EXISTS=$(grep -w $user /etc/trojan-go/akun.conf | wc -l)
 
-		if [[ ${user_EXISTS} == '1' ]]; then
+		if [[ ${user_EXISTS} -gt 0 ]]; then
 			echo ""
 			echo -e "Username ${RED}${user}${NC} Already On VPS Please Choose Another"
-			exit 1
+			continue
 		fi
 	done
 read -p "Expired (Days) : " masaaktif

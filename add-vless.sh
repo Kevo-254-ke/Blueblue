@@ -69,6 +69,8 @@ if [[ -z "$domain" ]]; then domain=$(cat /root/domain 2>/dev/null); fi
 if [[ -z "$domain" ]]; then echo "Server domain is not configured." >&2; exit 1; fi
 tls="$(cat ~/log-install.txt | grep -w "Vless TLS" | cut -d: -f2|sed 's/ //g')"
 none="$(cat ~/log-install.txt | grep -w "Vless None TLS" | cut -d: -f2|sed 's/ //g')"
+user=""
+CLIENT_EXISTS=1
 until [[ $user =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m" | tee -a /etc/log-create-user.log
 echo -e "\E[44;1;39m      Add XRAY VLESS Account      \E[0m"
@@ -77,7 +79,7 @@ echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━�
 		read -rp "User: " -e user
 		CLIENT_EXISTS=$(grep -w $user /etc/xray/config.json | wc -l)
 
-		if [[ ${CLIENT_EXISTS} == '1' ]]; then
+		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
 clear
 		echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m" | tee -a /etc/log-create-user.log
 		echo -e "\E[44;1;39m      Add XRAY VLESS Account      \E[0m"
@@ -86,7 +88,7 @@ clear
 			echo "A client with the specified name was already created, please choose another name."
 			echo ""
 			read -n 1 -s -r -p "Press any key to back on menu"
-			v2ray-menu
+			continue
 		fi
 	done
 

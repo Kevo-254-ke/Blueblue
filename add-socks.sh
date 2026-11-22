@@ -71,6 +71,8 @@ if [[ -z "$domain" ]]; then echo "Server domain is not configured." >&2; exit 1;
 
 
 tls="$(cat ~/log-install.txt | grep -w "Sodosok WS/GRPC" | cut -d: -f2|sed 's/ //g')"
+user=""
+CLIENT_EXISTS=1
 until [[ $user =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "\\E[0;41;36m      Add Socks Ws/Grpc Account    \E[0m"
@@ -79,7 +81,7 @@ echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━�
 		read -rp "User: " -e user
 		CLIENT_EXISTS=$(grep -w $user /etc/xray/config.json | wc -l)
 
-		if [[ ${CLIENT_EXISTS} == '1' ]]; then
+		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
 clear
             echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
             echo -e "\\E[0;41;36m      Add Socks  Ws/Grpc Account      \E[0m"
@@ -89,7 +91,7 @@ clear
 			echo ""
 			echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 			read -n 1 -s -r -p "Press any key to back on menu"
-xray-menu
+			continue
 		fi
 	done
 
